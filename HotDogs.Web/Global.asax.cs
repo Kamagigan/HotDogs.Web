@@ -12,10 +12,14 @@ using System.Web.Routing;
 
 namespace HotDogs.Web
 {
+    using System.Web.Mvc;
+    using System.Web.Optimization;
+
     public class WebApiApplication : System.Web.HttpApplication
     {
         protected void Application_Start()
         {
+            // Init WebAPI Routes
             GlobalConfiguration.Configure(WebApiConfig.Register);
 
             // Setting JSON formatter
@@ -29,6 +33,12 @@ namespace HotDogs.Web
                 config.CreateMap<HotDogViewModel, HotDog>().ReverseMap();
                 config.CreateMap<HotDogStoreViewModel, HotDogStore>().ReverseMap();
             });
+
+            // Init MVC 5
+            AreaRegistration.RegisterAllAreas();
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
     }
 }
