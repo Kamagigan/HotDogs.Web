@@ -15,7 +15,7 @@ namespace HotDogs.Web.Controllers.Api
     public class StoresController : ApiController
     {
         [HttpGet]
-        public IHttpActionResult GetAll()
+        public IHttpActionResult All()
         {
             try
             {
@@ -41,33 +41,33 @@ namespace HotDogs.Web.Controllers.Api
             }
         }
 
-        [HttpGet]
-        [Authorize]
-        public IHttpActionResult GetMyStores()
-        {
-            try
-            {
-                using (HotDogRepository repo = new HotDogRepository())
-                {
-                    var stores = repo.GetStoresByUsername(User.Identity.Name);
+        //[HttpGet]
+        //[Authorize]
+        //public IHttpActionResult GetMyStores()
+        //{
+        //    try
+        //    {
+        //        using (HotDogRepository repo = new HotDogRepository())
+        //        {
+        //            var stores = repo.GetStoresByUsername(User.Identity.Name);
 
-                    if (stores != null && stores.Count() > 0)
-                    {
-                        return Ok(Mapper.Map<IEnumerable<HotDogStoreViewModel>>(stores));
-                    }
-                    else
-                    {
-                        return NotFound();
-                    } 
-                }
-            }
-            catch (Exception ex)
-            {
-                return ResponseMessage(
-                    Request.CreateErrorResponse(
-                        HttpStatusCode.InternalServerError, ex));
-            }
-        }
+        //            if (stores != null && stores.Count() > 0)
+        //            {
+        //                return Ok(Mapper.Map<IEnumerable<HotDogStoreViewModel>>(stores));
+        //            }
+        //            else
+        //            {
+        //                return NotFound();
+        //            } 
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ResponseMessage(
+        //            Request.CreateErrorResponse(
+        //                HttpStatusCode.InternalServerError, ex));
+        //    }
+        //}
 
         [HttpPost]
         [Authorize]
@@ -81,7 +81,7 @@ namespace HotDogs.Web.Controllers.Api
                     {
                         var newStore = Mapper.Map<HotDogStore>(storeViewModel);
 
-                        newStore.ManagerName = User.Identity.Name;
+                        // newStore.ManagerName = User.Identity.Name;
 
                         repo.AddStore(newStore);
 

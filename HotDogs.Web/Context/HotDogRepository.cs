@@ -27,12 +27,12 @@ namespace HotDogs.Web.Context
             return _context.Stores.ToList();
         }
 
-        public IEnumerable<HotDogStore> GetStoresByUsername(string name)
-        {
-            return _context.Stores
-                .Where(s => s.ManagerName == name)
-                .ToList();
-        }
+        //public IEnumerable<HotDogStore> GetStoresByUsername(string name)
+        //{
+        //    return _context.Stores
+        //        .Where(s => s.ManagerName == name)
+        //        .ToList();
+        //}
 
         public HotDogStore GetStoreById(int storeId)
         {
@@ -51,7 +51,7 @@ namespace HotDogs.Web.Context
 
             if (store != null)
             {
-                newHotDog.HotDogStoreId = store.Id;
+                newHotDog.Store = store;
                 store.HotDogs.Add(newHotDog);
             }
         }
@@ -62,7 +62,7 @@ namespace HotDogs.Web.Context
                 throw new ArgumentOutOfRangeException("StoreId doit être superieur à 0");
 
             return _context.HotDogs
-                .Where(h => h.HotDogStoreId == storeId)
+                .Where(h => h.Store.Id == storeId)
                 .ToList();
         }
 

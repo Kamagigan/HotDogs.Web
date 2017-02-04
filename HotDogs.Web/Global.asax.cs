@@ -26,6 +26,7 @@ namespace HotDogs.Web
             var jsonFormatterSettings = GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings;
             jsonFormatterSettings.Formatting = Formatting.Indented;
             jsonFormatterSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            jsonFormatterSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
             // AutoMapper
             Mapper.Initialize(config =>

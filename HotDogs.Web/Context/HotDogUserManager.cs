@@ -9,5 +9,10 @@ namespace HotDogs.Web.Context
         {
 
         }
+
+        public HotDogUserManager(HotDogContext context) : base(new HotDogUserStore(context))
+        {
+
+        }
     }
 }

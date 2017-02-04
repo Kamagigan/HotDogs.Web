@@ -63,7 +63,7 @@ namespace HotDogs.Web.Controllers.Api
 
                         if (await repo.SaveChangesAsync())
                         {
-                            return Created($"api/stores/{newHotDog.HotDogStoreId}/hotdogs/{newHotDog.Id}",
+                            return Created($"api/stores/{newHotDog.Store.Id}/hotdogs/{newHotDog.Id}",
                                 Mapper.Map<HotDogViewModel>(newHotDog));
                         }
                         else
