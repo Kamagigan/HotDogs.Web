@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace HotDogs.Web.Models
 {
@@ -30,7 +28,7 @@ namespace HotDogs.Web.Models
         /// <summary>
         /// liste des <see cref="HotDog"/> à preparer
         /// </summary>
-        public virtual ICollection<HotDog> HotDogs { get; set; }
+        public virtual IList<HotDog> HotDogs { get; set; }
 
         /// <summary>
         /// Client ayant commandé le HotDog

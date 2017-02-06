@@ -15,7 +15,7 @@ namespace HotDogs.Web.Controllers.Api
     public class StoresController : ApiController
     {
         [HttpGet]
-        public IHttpActionResult All()
+        public IHttpActionResult GetAll()
         {
             try
             {
@@ -36,41 +36,74 @@ namespace HotDogs.Web.Controllers.Api
             catch (Exception ex)
             {
                 return ResponseMessage(
+                    Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
+            }
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetById(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    using (HotDogRepository repo = new HotDogRepository())
+                    {
+                        var store = repo.GetStoreById(id);
+
+                        if (store != null)
+                        {
+                            return Ok(Mapper.Map<HotDogViewModel>(store));
+                        }
+                        else
+                        {
+                            return NotFound();
+                        }
+                    }
+                }
+                else
+                {
+                    return BadRequest("Id doit être superieur à 0");
+                }
+            }
+            catch(Exception ex)
+            {
+                return ResponseMessage(
+                   Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "customer")]
+        [Route("favorites")]
+        public IHttpActionResult GetFavoriteStores()
+        {
+            try
+            {
+                using (HotDogRepository repo = new HotDogRepository())
+                {
+                    var stores = repo.GetUserFavoriteStores(User.Identity.Name);
+
+                    if (stores != null && stores.Count() > 0)
+                    {
+                        return Ok(Mapper.Map<IEnumerable<HotDogStoreViewModel>>(stores));
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return ResponseMessage(
                     Request.CreateErrorResponse(
                         HttpStatusCode.InternalServerError, ex));
             }
         }
 
-        //[HttpGet]
-        //[Authorize]
-        //public IHttpActionResult GetMyStores()
-        //{
-        //    try
-        //    {
-        //        using (HotDogRepository repo = new HotDogRepository())
-        //        {
-        //            var stores = repo.GetStoresByUsername(User.Identity.Name);
-
-        //            if (stores != null && stores.Count() > 0)
-        //            {
-        //                return Ok(Mapper.Map<IEnumerable<HotDogStoreViewModel>>(stores));
-        //            }
-        //            else
-        //            {
-        //                return NotFound();
-        //            } 
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ResponseMessage(
-        //            Request.CreateErrorResponse(
-        //                HttpStatusCode.InternalServerError, ex));
-        //    }
-        //}
-
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public async Task<IHttpActionResult> AddStore([FromBody]HotDogStoreViewModel storeViewModel)
         {
             try
@@ -81,7 +114,7 @@ namespace HotDogs.Web.Controllers.Api
                     {
                         var newStore = Mapper.Map<HotDogStore>(storeViewModel);
 
-                        // newStore.ManagerName = User.Identity.Name;
+                        newStore.Owner = repo.GetManagerByName(storeViewModel.OwnerName);
 
                         repo.AddStore(newStore);
 
@@ -101,9 +134,46 @@ namespace HotDogs.Web.Controllers.Api
             catch (Exception ex)
             {
                 return ResponseMessage(
-                    Request.CreateErrorResponse(
-                        HttpStatusCode.InternalServerError, ex));
+                    Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
             }
         }
+
+        // Not Working for now
+
+        //[HttpDelete]
+        //[Authorize(Roles = "manager, admin")]
+        //public async Task<IHttpActionResult> DeleteStore(int id)
+        //{
+        //    try
+        //    {
+        //        using (var repo = new HotDogRepository())
+        //        {
+        //            HotDogStore store = store = repo.GetStoreById(id);
+
+        //            if (store == null)
+        //                return NotFound();
+
+        //            if (User.IsInRole("admin") || repo.isValidManagerForStore(store.Id, User.Identity.Name))
+        //            {
+        //                // l'utilisateur a le droit de supprimer le magasin, donc on peut lancer la suppression
+        //                repo.DeleteStore(store);
+
+        //                await repo.SaveChangesAsync();
+
+        //                return Ok();
+        //            }
+        //            else
+        //            {
+        //                return ResponseMessage(
+        //                    Request.CreateResponse(HttpStatusCode.Forbidden));
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ResponseMessage(
+        //            Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
+        //    }
+        //}
     }
 }

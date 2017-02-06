@@ -247,7 +247,7 @@
     <Compile Include="Models\HotDogCustomer.cs" />
     <Compile Include="Models\HotDogOrder.cs" />
     <Compile Include="Models\HotDogStore.cs" />
-    <Compile Include="Models\HotDogStoreOwner.cs" />
+    <Compile Include="Models\HotDogStoreManager.cs" />
     <Compile Include="Models\HotDogUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />

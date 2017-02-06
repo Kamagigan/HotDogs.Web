@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace HotDogs.Web.Context
 {
@@ -11,73 +12,92 @@ namespace HotDogs.Web.Context
     {
         public HotDogSeedDb()
         {
-            //AutomaticMigrationsEnabled = true;
-            //AutomaticMigrationDataLossAllowed = true;
         }
 
-        protected override async void Seed(HotDogContext context)
+        protected override void Seed(HotDogContext context)
         {
             if (!context.Stores.Any())
             {
+                #region Init Roles
+                context.Roles.Add(new IdentityRole("admin"));
+                context.Roles.Add(new IdentityRole("manager"));
+                context.Roles.Add(new IdentityRole("customer"));
+                #endregion
+
                 #region Init Users
 
-                // Init Store Owner
-                var tommysOwner = new HotDogStoreOwner()
-                {
-                    UserName = "tommys",
-                    Email = "tommys@hotdog.com",
-                };
-
-                var hotdogfatherOwner = new HotDogStoreOwner()
-                {
-                    UserName = "hotdogfather",
-                    Email = "hotdogfather@hotdog.com",
-                };
-
-                var emilysOwner = new HotDogStoreOwner()
-                {
-                    UserName = "emilys",
-                    Email = "emilys@hotdog.com"
-                };
+                //les Owner doit être defini en dehors du scope de userManager pour être utilisé plus tard
+                HotDogStoreManager tommysOwner = null;
+                HotDogStoreManager hotdogfatherOwner = null;
+                HotDogStoreManager emilysOwner = null;
 
                 using (var userManager = new HotDogUserManager(context))
                 {
-                    // Create Admins
-                    userManager.Create(
-                        new HotDogUser()
-                        {
-                            UserName = "lcudini",
-                            Email = "lcudini@klanik.com"
-                        }, "Azerty0!");
+                    // Init Admins
+                    var lcudini = new HotDogUser()
+                    {
+                        UserName = "lcudini",
+                        Email = "lcudini@klanik.com",
+                    };
 
-                    userManager.Create(
-                        new HotDogUser()
-                        {
-                            UserName = "gmoreau",
-                            Email = "gmoreau@klanik.com",
-                        }, "Azerty0!");
+                    userManager.Create(lcudini, "Azerty0!");
+                    userManager.AddToRole(lcudini.Id, "admin");
 
-                    // Create Store Owners  
+                    var gmoreau = new HotDogUser()
+                    {
+                        UserName = "gmoreau",
+                        Email = "gmoreau@klanik.com",
+                    };
+
+                    userManager.Create(gmoreau, "Azerty0!");
+                    userManager.AddToRole(gmoreau.Id, "manager");
+
+                    // Init Store Owner
+                    tommysOwner = new HotDogStoreManager()
+                    {
+                        UserName = "tommys",
+                        Email = "tommys@hotdog.com",
+                    };
+
                     userManager.Create(tommysOwner, "Azerty0!");
+                    userManager.AddToRole(tommysOwner.Id, "manager");
+
+                    hotdogfatherOwner = new HotDogStoreManager()
+                    {
+                        UserName = "hotdogfather",
+                        Email = "hotdogfather@hotdog.com",
+                    };
 
                     userManager.Create(hotdogfatherOwner, "Azerty0!");
+                    userManager.AddToRole(hotdogfatherOwner.Id, "manager");
+
+                    emilysOwner = new HotDogStoreManager()
+                    {
+                        UserName = "emilys",
+                        Email = "emilys@hotdog.com"
+                    };
 
                     userManager.Create(emilysOwner, "Azerty0!");
+                    userManager.AddToRole(emilysOwner.Id, "manager");
 
                     // Create Clients
-                    userManager.Create(
-                        new HotDogCustomer()
-                        {
-                            UserName = "gerard",
-                            Email = "gerard@gmail.com",
-                        }, "Azerty0!");
+                    var customer1 = new HotDogCustomer()
+                    {
+                        UserName = "gerard",
+                        Email = "gerard@gmail.com",
+                    };
 
-                    userManager.Create(
-                        new HotDogCustomer()
-                        {
-                            UserName = "jeanjacques",
-                            Email = "jeanjacques@gmail.com",
-                        }, "Azerty0!");
+                    userManager.Create(customer1, "Azerty0!");
+                    userManager.AddToRole(customer1.Id, "customer");
+
+                    var customer2 = new HotDogCustomer()
+                    {
+                        UserName = "jeanjacques",
+                        Email = "jeanjacques@gmail.com",
+                    };
+
+                    userManager.Create(customer2, "Azerty0!");
+                    userManager.AddToRole(customer2.Id, "customer");
                 }
 
                 #endregion
@@ -90,7 +110,11 @@ namespace HotDogs.Web.Context
                     Location = "Avignon",
                     Latitude = 43.9786091,
                     Longitude = 4.8712175,
-                    Owner = tommysOwner
+                    Owner = tommysOwner,
+                    Managers = new List<HotDogStoreManager>()
+                    {
+                        tommysOwner
+                    }
                 };
 
                 context.Stores.Add(tommys);
@@ -101,7 +125,11 @@ namespace HotDogs.Web.Context
                     Location = "Lyon",
                     Latitude = 45.7634609,
                     Longitude = 4.8427191,
-                    Owner = hotdogfatherOwner
+                    Owner = hotdogfatherOwner,
+                    Managers = new List<HotDogStoreManager>()
+                    {
+                        hotdogfatherOwner
+                    }
                 };
 
                 context.Stores.Add(hotdogfather);
@@ -112,7 +140,11 @@ namespace HotDogs.Web.Context
                     Location = "Grenoble",
                     Latitude = 45.1921764,
                     Longitude = 5.7304209,
-                    Owner = emilysOwner
+                    Owner = emilysOwner,
+                    Managers = new List<HotDogStoreManager>()
+                    {
+                        emilysOwner
+                    }
                 };
 
                 context.Stores.Add(emilys);

@@ -4,6 +4,13 @@ namespace HotDogs.Web.Models
 {
     public class HotDogStore
     {
+        public HotDogStore()
+        {
+            Orders = new List<HotDogOrder>();
+            HotDogs = new List<HotDog>();
+            Managers = new List<HotDogStoreManager>();
+        }
+
         /// <summary>
         /// Id du magasin
         /// </summary>
@@ -29,19 +36,24 @@ namespace HotDogs.Web.Models
         /// </summary>
         public double Longitude { get; set; }
 
+        ///// <summary>
+        ///// le manager qui possède le magasin
+        ///// </summary>
+        public virtual HotDogStoreManager Owner { get; set; }
+
         /// <summary>
-        /// lien vers le gerant du magasin
+        /// les managers du magasin  
         /// </summary>
-        public virtual HotDogStoreOwner Owner { get; set; }
+        public virtual IList<HotDogStoreManager> Managers { get; set; }
 
         /// <summary>
         /// Hotdogs vendu par le magasin
         /// </summary>
-        public virtual ICollection<HotDog> HotDogs { get; set; }
+        public virtual IList<HotDog> HotDogs { get; set; }
 
         /// <summary>
         /// Commandes passés par les clients du magasin
         /// </summary>
-        public virtual ICollection<HotDogOrder> Orders { get; set; }
+        public virtual IList<HotDogOrder> Orders { get; set; }
     }
 }

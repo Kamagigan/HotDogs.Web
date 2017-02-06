@@ -9,12 +9,20 @@ namespace HotDogs.Web.Context
     {
         public HotDogContext() : base("HotDogContext")
         {
-            // Database.SetInitializer(new HotDogContextInitializer());
             Database.SetInitializer(new HotDogSeedDb());
+            this.Configuration.ProxyCreationEnabled = false;
         }
 
+        // persiste les magasins
         public DbSet<HotDogStore> Stores { get; set; }
+        // persiste les hotdogs
         public DbSet<HotDog> HotDogs { get; set; }
+        // persiste les clients
+        public DbSet<HotDogCustomer> Customers {get; set;}
+        // persiste les proprietaires
+        public DbSet<HotDogStoreManager> StoreManagers { get; set; }
+        // persiste les commandes
+        public DbSet<HotDogOrder> Orders { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -23,6 +31,10 @@ namespace HotDogs.Web.Context
             // Deactive les cascade de suppression dans les relations ManyToMany
             modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
 
+            //// Gestion de l'heritage en base
+            //modelBuilder.Types()
+            //.Configure(c => c.ToTable(c.ClrType.Name));
+
             // Relation 1 hotdog => 1 Store => * hotdogs
             // Si le store est supprimé -> les hotdogs sont supprimés 
             modelBuilder.Entity<HotDogStore>()
@@ -30,11 +42,20 @@ namespace HotDogs.Web.Context
                 .WithRequired(h => h.Store)
                 .WillCascadeOnDelete(true);
 
-            // Relation 1 Store => 1 Owner => 0.1 Store 
+            //// Relation 1 Store => 1 Owner => 0.1 Store
             modelBuilder.Entity<HotDogStore>()
-                .HasRequired(s => s.Owner)
-                .WithOptional(o => o.Store)
-                .WillCascadeOnDelete(false);
+                .HasRequired(s => s.Owner);
+
+            // Relation * managers => * magasins
+            modelBuilder.Entity<HotDogStore>()
+                .HasMany(s => s.Managers)
+                .WithMany(m => m.Stores)
+                .Map(m =>
+                {
+                    m.MapLeftKey("UserId");
+                    m.MapRightKey("StoreId");
+                    m.ToTable("Managers_Stores");
+                });
 
             // Relation 1 Store => * Orders => 1 Store
             modelBuilder.Entity<HotDogStore>()
@@ -42,7 +63,7 @@ namespace HotDogs.Web.Context
                 .WithRequired(o => o.Store)
                 .WillCascadeOnDelete(true);
 
-            // Relation Customer => * Favorite Store
+            // Relation * Customer => * Favorite Store
             modelBuilder.Entity<HotDogCustomer>()
                 .HasMany(c => c.FavoriteStores)
                 .WithMany()
@@ -50,9 +71,10 @@ namespace HotDogs.Web.Context
                 {
                     m.MapLeftKey("UserId");
                     m.MapRightKey("StoreId");
-                    m.ToTable("UserFavoriteStores");
+                    m.ToTable("Customers_FavoriteStores");
                 });
 
+            // Relation 1 client => * Orders => 1 client
             modelBuilder.Entity<HotDogCustomer>()
                 .HasMany(c => c.Orders)
                 .WithRequired(o => o.Customer)
@@ -72,6 +94,7 @@ namespace HotDogs.Web.Context
                 .WithOptional()
                 .WillCascadeOnDelete(false);
 
+            // Relation 1 Commande => * Hotdogs
             modelBuilder.Entity<HotDogOrder>()
                 .HasMany(o => o.HotDogs)
                 .WithMany()

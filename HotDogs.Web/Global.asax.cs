@@ -32,7 +32,11 @@ namespace HotDogs.Web
             Mapper.Initialize(config =>
             {
                 config.CreateMap<HotDogViewModel, HotDog>().ReverseMap();
-                config.CreateMap<HotDogStoreViewModel, HotDogStore>().ReverseMap();
+                //config.CreateMap<HotDogStoreViewModel, HotDogStore>().ReverseMap();
+
+                config.CreateMap<HotDogStore, HotDogStoreViewModel>()
+                .ForMember("OwnerName", m => m.MapFrom(s => s.Owner.UserName))
+                .ReverseMap();
             });
 
             // Init MVC 5

@@ -13,31 +13,72 @@ using System.Web.Http;
 
 namespace HotDogs.Web.Controllers.Api
 {
+    [RoutePrefix("api/hotdogs")]
     public class HotDogsController : ApiController
     {
-        public IHttpActionResult GetByStoreId(int storeId)
+        [HttpGet]
+        [Route("{id:int}")]
+        public IHttpActionResult GetHotDogById(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    using (var repo = new HotDogRepository())
+                    {
+                        var hotdog = repo.GetHotDogById(id);
+
+                        if (hotdog != null)
+                        {
+                            //return Ok(Mapper.Map<IEnumerable<HotDogViewModel>>(hotdog));
+                            return Ok(hotdog);
+                        }
+                        else
+                        {
+                            //ce hotdog specifique n'existe pas alors on renvoie NotFound
+                            return NotFound();
+                        }
+                    }
+                }
+                else
+                {
+                    return BadRequest("HotDogId doit être superieur à 0");
+                }
+            }
+            catch(Exception ex)
+            {
+                return ResponseMessage(
+                    Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
+            }
+        }
+
+        [HttpGet]
+        [Route("store/{id:int}")]
+        public IHttpActionResult GetByStoreId(int id)
         {
             try
             {
                 using (HotDogRepository repo = new HotDogRepository())
                 {
-                    if (storeId > 0)
+                    if (id > 0)
                     {
-                        var hotdogs = repo.GetHotDogsByStoreId(storeId);
+                        var hotdogs = repo.GetHotDogsByStoreId(id);
 
                         if (hotdogs != null && hotdogs.Count() > 0)
                         {
-                            return Ok(Mapper.Map<IEnumerable<HotDogViewModel>>(hotdogs));
+                            //return Ok(Mapper.Map<IEnumerable<HotDogViewModel>>(hotdogs));
+                            return Ok(hotdogs);
                         }
                         else
                         {
-                            return NotFound();
+                            // la liste de Hotdogs du magasin est vide mais ce n'est pas erreur alors on renvoie rien 
+                            return Ok();
                         }
                     }
                     else
                     {
                         return BadRequest("StoreId doit être superieur à 0");
-                    } 
+                    }
                 }
             }
             catch (Exception ex)
@@ -49,13 +90,15 @@ namespace HotDogs.Web.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IHttpActionResult> Add(int storeId, [FromBody] HotDogViewModel hotDogViewModel)
+        [Authorize(Roles = "manager,admin")]
+        public async Task<IHttpActionResult> AddHotDog(int storeId, [FromBody] HotDogViewModel hotDogViewModel)
         {
             try
             {
                 using (HotDogRepository repo = new HotDogRepository())
                 {
-                    if (ModelState.IsValid)
+                    if ((User.IsInRole("admin") || repo.isValidManagerForStore(storeId, User.Identity.Name))
+                        && ModelState.IsValid)
                     {
                         var newHotDog = Mapper.Map<HotDog>(hotDogViewModel);
 
@@ -79,26 +122,41 @@ namespace HotDogs.Web.Controllers.Api
             }
             catch (Exception ex)
             {
-                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
+                return ResponseMessage(
+                    Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex));
             }
         }
 
         [HttpDelete]
-        public async Task<IHttpActionResult> Delete (int hotdogId)
+        [Authorize(Roles = "manager,admin")]
+        public async Task<IHttpActionResult> DeleteHotDog (int hotdogId)
         {
             try
             {
                 using (HotDogRepository repo = new HotDogRepository())
                 {
-                    repo.DeleteHotDogById(hotdogId);
+                    var hotdog = repo.GetHotDogById(hotdogId);
 
-                    if (await repo.SaveChangesAsync())
-                    {
-                        return Ok();
+                    if (hotdog == null)
+                        return NotFound();
+
+                    if (User.IsInRole("admin") || repo.isValidManagerForStore(hotdog.Store.Id, User.Identity.Name))
+                    {             
+                        repo.DeleteHotDog(hotdog);
+
+                        if (await repo.SaveChangesAsync())
+                        {
+                            return Ok();
+                        }
+                        else
+                        {
+                            throw new Exception("Sauvegarde en base échouée");
+                        }
                     }
                     else
                     {
-                        return NotFound();
+                        return ResponseMessage(
+                            Request.CreateResponse(HttpStatusCode.Forbidden));
                     }
                 }
             }

@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace HotDogs.Web.Context
 {
@@ -17,6 +17,13 @@ namespace HotDogs.Web.Context
             _context = new HotDogContext();
         }
 
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync()) > 0;
+        }
+
+        // Hotdogs Store
+
         public void AddStore(HotDogStore store)
         {
             _context.Stores.Add(store);
@@ -24,15 +31,9 @@ namespace HotDogs.Web.Context
 
         public IEnumerable<HotDogStore> GetAllStores()
         {
-            return _context.Stores.ToList();
+            return _context.Stores
+                .ToList();
         }
-
-        //public IEnumerable<HotDogStore> GetStoresByUsername(string name)
-        //{
-        //    return _context.Stores
-        //        .Where(s => s.ManagerName == name)
-        //        .ToList();
-        //}
 
         public HotDogStore GetStoreById(int storeId)
         {
@@ -44,6 +45,43 @@ namespace HotDogs.Web.Context
                     .Include(s => s.HotDogs)
                     .FirstOrDefault();
         }
+
+        public IEnumerable<HotDogStore> GetStoresByManagerName(string managerUserName)
+        {
+            return _context.StoreManagers
+                .Where(m => m.UserName == managerUserName).FirstOrDefault()
+                .Stores;
+        }
+
+        public IEnumerable<HotDogStore> GetUserFavoriteStores(string customerUserName)
+        {
+            return _context.Customers
+                .Where(c => c.UserName == customerUserName).FirstOrDefault()
+                .FavoriteStores;
+        }
+
+        public void UpdateStore (HotDogStore store)
+        {
+            if (store == null)
+                throw new ArgumentNullException("Store ne peut pas être null");
+
+            _context.Stores.AddOrUpdate(store);
+        }
+
+        public void DeleteStore (HotDogStore store)
+        {
+            if (store != null)
+                _context.Stores.Remove(store);
+        }
+
+        public void deleteStoreById(int storeId)
+        {
+            var store = GetStoreById(storeId);
+
+            DeleteStore(store);
+        }
+
+        // HotDogs
 
         public void AddHotDog(int storeId, HotDog newHotDog)
         {
@@ -76,27 +114,101 @@ namespace HotDogs.Web.Context
                     select h).SingleOrDefault();
         }
 
-        public async Task<bool> SaveChangesAsync()
+        public void UpdateHotDog(HotDog hotdog)
         {
-            return (await _context.SaveChangesAsync()) > 0;
+            if (hotdog == null)
+                throw new ArgumentNullException("HotDog ne peut pas être null");
+
+            _context.HotDogs.AddOrUpdate(hotdog);
         }
 
-        internal void DeleteHotDog(HotDog hotdog)
+        public void DeleteHotDog(HotDog hotdog)
         {
             _context.HotDogs.Remove(hotdog);
         }
-        internal void DeleteHotDogById(int hotdogId)
+
+        public void DeleteHotDogById(int hotdogId)
         {
             var hotdog = GetHotDogById(hotdogId);
 
             if (hotdog != null)
                 DeleteHotDog(hotdog);
         }
+
+        // Customer
+
+        public HotDogCustomer GetCustomerByGuid (string customerGuid)
+        {
+            return _context.Customers
+                .Where(c => c.Id == customerGuid)
+                .FirstOrDefault();
+        }
+
+        // Managers
+
+        public HotDogStoreManager GetManagerByName(string userName)
+        {
+            return _context.StoreManagers
+                .Where(m => m.UserName == userName)
+                .FirstOrDefault();
+        }
+
+        public bool isValidManagerForStore(int storeId, string managerName)
+        {
+            var storeResult = GetStoreById(storeId).Managers
+                .Where(m => m.UserName == managerName)
+                .FirstOrDefault();
+
+            if (storeResult != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // Orders
+
+        public void AddOrder (HotDogOrder order)
+        {
+            _context.Orders.Add(order);
+        }
+
+        public void AddOrder (int storeId, string customerGuid, IEnumerable<int> hotdogsIds)
+        {
+            HotDogOrder order = new HotDogOrder();
+
+            order.Customer = GetCustomerByGuid(customerGuid);
+            order.Store = GetStoreById(storeId);
+
+            foreach (var hotDogId in hotdogsIds)
+            {
+                order.HotDogs.Add(GetHotDogById(hotDogId));
+            }
+
+            AddOrder(order);
+        }
+
+        public IEnumerable<HotDogOrder> GetOrdersByCustomerId (string customerGuid)
+        {
+            return _context.Customers
+                .Where(c => c.Id == customerGuid).FirstOrDefault()
+                .Orders;
+        }
+
+        public IEnumerable<HotDogOrder> GetOrdersByStoreId (int storeId)
+        {
+            return _context.Stores
+                .Where(s => s.Id == storeId).FirstOrDefault()
+                .Orders;
+        }
+
+        // IDispose
         public void Dispose()
         {
             _context.Dispose();
         }
-
-
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace HotDogs.Web.Models
 {
@@ -10,14 +7,20 @@ namespace HotDogs.Web.Models
     /// </summary>
     public class HotDogCustomer : HotDogUser
     {
+        public HotDogCustomer() : base()
+        {
+            FavoriteStores = new List<HotDogStore>();
+            Orders = new List<HotDogOrder>();
+        }
+
         /// <summary>
         /// Magasins favoris du client
         /// </summary>
-        public virtual ICollection<HotDogStore> FavoriteStores { get; set; }
+        public virtual IList<HotDogStore> FavoriteStores { get; set; }
 
         /// <summary>
         /// Commandes du client
         /// </summary>
-        public virtual ICollection<HotDogOrder> Orders { get; set; }
+        public virtual IList<HotDogOrder> Orders { get; set; }
     }
 }

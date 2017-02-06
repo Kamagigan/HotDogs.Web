@@ -12,20 +12,23 @@ namespace HotDogs.Web.Identity
 {
     public class CustomOAuthProvider : OAuthAuthorizationServerProvider
     {
-        public override Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
+        public override Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext oauthContext)
         {
-            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
+            oauthContext.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
 
-            var user = context.OwinContext.Get<HotDogContext>().Users.FirstOrDefault(u => u.UserName == context.UserName);
-            if (!context.OwinContext.Get<HotDogUserManager>().CheckPassword(user, context.Password))
+            // Get the user
+            var user = oauthContext.OwinContext.Get<HotDogContext>().Users.FirstOrDefault(u => u.UserName == oauthContext.UserName);
+
+            // Check Password
+            if (!oauthContext.OwinContext.Get<HotDogUserManager>().CheckPassword(user, oauthContext.Password))
             {
-                context.SetError("invalid_grant", "The username or password is incorrect");
-                context.Rejected();
+                oauthContext.SetError("invalid_grant", "The username or password is incorrect");
+                oauthContext.Rejected();
                 return Task.FromResult<object>(null);
             }
 
-            var ticket = new AuthenticationTicket(SetClaimsIdentity(context, user), new AuthenticationProperties());
-            context.Validated(ticket);
+            var ticket = new AuthenticationTicket(SetClaimsIdentity(oauthContext, user), new AuthenticationProperties());
+            oauthContext.Validated(ticket);
 
             return Task.FromResult<object>(null);
         }

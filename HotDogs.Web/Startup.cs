@@ -9,7 +9,7 @@ using Owin;
 using System;
 using System.Configuration;
 
-[assembly: OwinStartup(typeof(HotDogs.Web.Startup))]
+// [assembly: OwinStartup(typeof(HotDogs.Web.Startup))]
 namespace HotDogs.Web
 {
     public class Startup
