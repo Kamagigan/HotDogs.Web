@@ -11,7 +11,7 @@ namespace HotDogs.Web.Models
         public HotDogOrder()
         {
             HotDogs = new List<HotDog>();
-            Status = HotDogOrderStatusEnum.Preparing;
+            Status = HotDogOrderStatus.Preparing;
             DateCreated = DateTime.Now;
         }
 
@@ -38,7 +38,7 @@ namespace HotDogs.Web.Models
         /// <summary>
         /// Statut de la commande
         /// </summary>
-        public HotDogOrderStatusEnum Status { get; set; }
+        public HotDogOrderStatus Status { get; set; }
 
         /// <summary>
         /// Date et heure de la commande
@@ -46,7 +46,7 @@ namespace HotDogs.Web.Models
         public DateTime DateCreated { get; set; }
     }
 
-    public enum HotDogOrderStatusEnum
+    public enum HotDogOrderStatus
     {
         Preparing = 0,
         Ready = 1,

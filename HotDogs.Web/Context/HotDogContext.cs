@@ -31,10 +31,6 @@ namespace HotDogs.Web.Context
             // Deactive les cascade de suppression dans les relations ManyToMany
             modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
 
-            //// Gestion de l'heritage en base
-            //modelBuilder.Types()
-            //.Configure(c => c.ToTable(c.ClrType.Name));
-
             // Relation 1 hotdog => 1 Store => * hotdogs
             // Si le store est supprimé -> les hotdogs sont supprimés 
             modelBuilder.Entity<HotDogStore>()

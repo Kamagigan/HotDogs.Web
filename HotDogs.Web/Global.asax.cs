@@ -3,10 +3,6 @@ using HotDogs.Web.Models;
 using HotDogs.Web.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Http;
 using System.Web.Routing;
 

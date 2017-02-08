@@ -23,7 +23,7 @@ namespace HotDogs.Web.Controllers.Api
                 {
                     var stores = repo.GetAllStores();
 
-                    if (stores != null && stores.Count() > 0)
+                    if (stores.Any())
                     {
                         return Ok(Mapper.Map<IEnumerable<HotDogStoreViewModel>>(stores));
                     }
@@ -84,7 +84,7 @@ namespace HotDogs.Web.Controllers.Api
                 {
                     var stores = repo.GetUserFavoriteStores(User.Identity.Name);
 
-                    if (stores != null && stores.Count() > 0)
+                    if (stores.Any())
                     {
                         return Ok(Mapper.Map<IEnumerable<HotDogStoreViewModel>>(stores));
                     }

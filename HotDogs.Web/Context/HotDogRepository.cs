@@ -10,7 +10,7 @@ namespace HotDogs.Web.Context
 {
     public class HotDogRepository : IDisposable
     {
-        private HotDogContext _context;
+        private readonly HotDogContext _context;
 
         public HotDogRepository()
         {
@@ -155,9 +155,12 @@ namespace HotDogs.Web.Context
 
         public bool isValidManagerForStore(int storeId, string managerName)
         {
-            var storeResult = GetStoreById(storeId).Managers
-                .Where(m => m.UserName == managerName)
-                .FirstOrDefault();
+            // var storeResult = GetStoreById(storeId).Managers
+            //     .Where(m => m.UserName == managerName)
+            //     .FirstOrDefault();
+
+             var storeResult = GetStoreById(storeId).Managers
+                .FirstOrDefault(m => m.UserName == managerName);
 
             if (storeResult != null)
             {

@@ -1,5 +1,4 @@
-﻿using HotDogs.Web.Models;
-using Microsoft.AspNet.Identity.EntityFramework;
+﻿using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace HotDogs.Web.Context
 {

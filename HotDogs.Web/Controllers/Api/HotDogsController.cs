@@ -3,12 +3,10 @@ using HotDogs.Web.Context;
 using HotDogs.Web.Models;
 using HotDogs.Web.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 
 namespace HotDogs.Web.Controllers.Api
@@ -64,7 +62,7 @@ namespace HotDogs.Web.Controllers.Api
                     {
                         var hotdogs = repo.GetHotDogsByStoreId(id);
 
-                        if (hotdogs != null && hotdogs.Count() > 0)
+                        if (hotdogs.Any())
                         {
                             //return Ok(Mapper.Map<IEnumerable<HotDogViewModel>>(hotdogs));
                             return Ok(hotdogs);

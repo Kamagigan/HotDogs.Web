@@ -1,6 +1,5 @@
 ﻿using Microsoft.Owin.Security;
 using System;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security.DataHandler.Encoder;
 using System.Configuration;
 using System.IdentityModel.Tokens;
@@ -10,7 +9,7 @@ namespace HotDogs.Web.Identity
 {
     public class CustomJwtFormat : ISecureDataFormat<AuthenticationTicket>
     {
-        private string _issuer;
+        private readonly string _issuer;
         private static readonly Byte[] _secret = TextEncodings.Base64Url.Decode(ConfigurationManager.AppSettings["secret"]);
 
         public CustomJwtFormat(string issuer)
